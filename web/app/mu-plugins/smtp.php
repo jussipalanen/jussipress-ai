@@ -1,4 +1,5 @@
 <?php
+
 /**
  * SMTP mailer — configures PHPMailer from environment variables.
  * Compatible with Brevo (smtp-relay.brevo.com) and any SMTP provider.
