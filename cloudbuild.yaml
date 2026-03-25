@@ -56,7 +56,7 @@
 #     --description="JussiPress AI images"
 
 substitutions:
-  _REGION: eu-north1
+  _REGION: europe-north1
   _REPO: jussipress-ai
   _IMAGE: app
   _SERVICE: jussipress-ai-production                     # Cloud Run service name
