@@ -3,7 +3,7 @@
 # =============================================================
 ARG THEME='jussipress-theme'
 ARG NODE_VERSION=22
-ARG PHP_VERSION=8.3
+ARG PHP_VERSION=8.4
 ARG COMPOSER_VERSION=2
 
 # =============================================================
