@@ -15,14 +15,17 @@ parameters:
         - web/wp
         - web/app/plugins
         - web/app/themes/twentytwentyfive
+        - web/app/mu-plugins/bedrock-disallow-indexing
 
     # Bedrock loads WordPress via Composer — tell PHPStan where to find it
+    bootstrapFiles:
+        - web/app/themes/jussipress-theme/vendor/autoload.php
+
     scanDirectories:
         - vendor
         - web/wp
         - web/app/themes/jussipress-theme/vendor
 
-    # Suppress noisy WordPress patterns at this level
     ignoreErrors:
-        # Dynamic WordPress hook callbacks are not always statically resolvable
-        - '#Call to function add_(action|filter)\(\) with .+ parameters#'
+        # Laravel/Acorn global helpers (collect, public_path, etc.) are registered at runtime
+        - '#Function (collect|public_path) not found\.#'
