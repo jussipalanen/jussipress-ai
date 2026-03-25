@@ -62,7 +62,7 @@ substitutions:
   _SERVICE: jussipress-ai-production                     # Cloud Run service name
   _DOMAIN: ''              # set in trigger
   _CLOUDSQL_INSTANCE: ''   # set in trigger: PROJECT_ID:region:instance
-  _DEPLOY: 'false'         # overridden to 'true' by the *-production tag trigger
+  _DEPLOY: 'true'          # deploy on every build
   _DB_NAME: ''             # set in trigger
   _DB_USER: ''             # set in trigger
 
