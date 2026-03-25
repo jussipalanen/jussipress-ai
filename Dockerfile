@@ -13,7 +13,7 @@ FROM node:${NODE_VERSION}-alpine AS assets
 ARG THEME
 
 # Apply OS security patches
-RUN apk upgrade --no-cache
+RUN apk upgrade --no-cache --no-scripts
 
 WORKDIR /build
 
@@ -31,7 +31,7 @@ RUN npm run build
 FROM composer:${COMPOSER_VERSION} AS vendor
 
 # Apply OS security patches
-RUN apk upgrade --no-cache
+RUN apk upgrade --no-cache --no-scripts
 
 WORKDIR /app
 
@@ -56,7 +56,7 @@ FROM composer:${COMPOSER_VERSION} AS theme-vendor
 ARG THEME
 
 # Apply OS security patches
-RUN apk upgrade --no-cache
+RUN apk upgrade --no-cache --no-scripts
 
 WORKDIR /theme
 
@@ -80,7 +80,7 @@ FROM php:${PHP_VERSION}-fpm-alpine AS production
 ARG THEME
 
 # Apply OS security patches first
-RUN apk upgrade --no-cache
+RUN apk upgrade --no-cache --no-scripts
 
 # ---- Permanent runtime libraries ----
 RUN apk add --no-cache \
