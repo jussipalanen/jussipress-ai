@@ -1,0 +1,28 @@
+<?php
+
+namespace App\View\Composers;
+
+use Roots\Acorn\View\Composer;
+
+/**
+ * App class
+ */
+class App extends Composer
+{
+    /**
+     * List of views served by this composer.
+     *
+     * @var array<string>
+     */
+    protected static $views = [
+        '*',
+    ];
+
+    /**
+     * Retrieve the site name.
+     */
+    public function siteName(): string
+    {
+        return get_bloginfo('name', 'display');
+    }
+}

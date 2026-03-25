@@ -1,0 +1,14 @@
+{
+  "name": "jussipress-ai",
+  "version": "1.0.0",
+  "description": "A modern WordPress project built on [Roots Bedrock](https://roots.io/bedrock/) and the [Sage](https://roots.io/sage/) starter theme, containerised for [Google Cloud Platform](https://cloud.google.com/) with a focus on minimal infrastructure cost.",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}

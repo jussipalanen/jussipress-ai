@@ -1,0 +1,278 @@
+#!/usr/bin/env bash
+# dev.sh — Docker development helpers for JussiPress AI (Bedrock + Sage)
+#
+# Usage (run directly):   ./dev.sh <command> [args]
+# Usage (source aliases): source dev.sh
+#
+# Dependencies: docker compose v2, npm (for theme-dev)
+
+set -euo pipefail
+
+COMPOSE="docker compose"
+APP="app"
+THEME_DIR="web/app/themes/jussipress-theme"
+
+# =============================================================
+# Docker Compose
+# =============================================================
+
+up() {
+  # Start all services (or specific ones) detached
+  $COMPOSE up -d "$@"
+}
+
+down() {
+  # Stop and remove containers + orphans
+  $COMPOSE down --remove-orphans "$@"
+}
+
+stop() {
+  # Stop service(s) without removing them
+  $COMPOSE stop "$@"
+}
+
+restart() {
+  # Restart service(s)
+  $COMPOSE restart "$@"
+}
+
+rebuild() {
+  # Rebuild and recreate service(s) — useful after Dockerfile changes
+  $COMPOSE up -d --build "$@"
+}
+
+logs() {
+  # Follow logs (all services or specific one)
+  $COMPOSE logs -f "${@:-}"
+}
+
+ps() {
+  # Show container status
+  $COMPOSE ps "$@"
+}
+
+# =============================================================
+# Container access
+# =============================================================
+
+shell() {
+  # Open sh in the app container as www-data
+  $COMPOSE exec -u www-data "$APP" sh
+}
+
+root-shell() {
+  # Open sh in the app container as root
+  $COMPOSE exec -u root "$APP" sh
+}
+
+# =============================================================
+# WordPress (WP-CLI)
+# =============================================================
+
+wp() {
+  # Run a WP-CLI command inside the app container
+  # Example: ./dev.sh wp plugin list
+  $COMPOSE exec -u www-data "$APP" wp --allow-root "$@"
+}
+
+# =============================================================
+# PHP / Composer
+# =============================================================
+
+composer() {
+  # Run Composer inside the app container
+  $COMPOSE exec -u www-data "$APP" composer "$@"
+}
+
+lint() {
+  # PHP code style check (Laravel Pint — check only)
+  $COMPOSE exec -u www-data "$APP" composer lint
+}
+
+lint-fix() {
+  # Auto-fix PHP code style (Laravel Pint)
+  $COMPOSE exec -u www-data "$APP" composer lint:fix
+}
+
+analyse() {
+  # PHP static analysis (PHPStan)
+  $COMPOSE exec -u www-data "$APP" composer analyse
+}
+
+test() {
+  # Run Pest test suite
+  $COMPOSE exec -u www-data "$APP" composer test
+}
+
+# =============================================================
+# Database
+# =============================================================
+
+db() {
+  # Open the MariaDB CLI (reads credentials from .env)
+  # shellcheck source=.env
+  local name user pass
+  name="$(grep '^DB_NAME=' .env 2>/dev/null | cut -d= -f2 | tr -d "'\"")"
+  user="$(grep '^DB_USER=' .env 2>/dev/null | cut -d= -f2 | tr -d "'\"")"
+  pass="$(grep '^DB_PASSWORD=' .env 2>/dev/null | cut -d= -f2 | tr -d "'\"")"
+  $COMPOSE exec db mariadb \
+    -u"${user:-wordpress}" \
+    -p"${pass:-wordpress}" \
+    "${name:-wordpress}"
+}
+
+db-dump() {
+  # Dump database to stdout  (redirect to file: ./dev.sh db-dump > dump.sql)
+  local name user pass
+  name="$(grep '^DB_NAME=' .env 2>/dev/null | cut -d= -f2 | tr -d "'\"")"
+  user="$(grep '^DB_USER=' .env 2>/dev/null | cut -d= -f2 | tr -d "'\"")"
+  pass="$(grep '^DB_PASSWORD=' .env 2>/dev/null | cut -d= -f2 | tr -d "'\"")"
+  $COMPOSE exec db mariadb-dump \
+    -u"${user:-wordpress}" \
+    -p"${pass:-wordpress}" \
+    "${name:-wordpress}"
+}
+
+db-import() {
+  # Import a SQL file: ./dev.sh db-import dump.sql
+  local file="${1:?Usage: db-import <file.sql>}"
+  local name user pass
+  name="$(grep '^DB_NAME=' .env 2>/dev/null | cut -d= -f2 | tr -d "'\"")"
+  user="$(grep '^DB_USER=' .env 2>/dev/null | cut -d= -f2 | tr -d "'\"")"
+  pass="$(grep '^DB_PASSWORD=' .env 2>/dev/null | cut -d= -f2 | tr -d "'\"")"
+  $COMPOSE exec -T db mariadb \
+    -u"${user:-wordpress}" \
+    -p"${pass:-wordpress}" \
+    "${name:-wordpress}" < "$file"
+}
+
+# =============================================================
+# Theme — Vite / npm
+# =============================================================
+
+theme-npm() {
+  # Run any npm command in the theme directory
+  # Example: ./dev.sh theme-npm install
+  (cd "$THEME_DIR" && npm "$@")
+}
+
+theme-install() {
+  # Install theme npm dependencies
+  (cd "$THEME_DIR" && npm ci)
+}
+
+theme-dev() {
+  # Start Vite dev server with HMR (runs on the host)
+  echo "Starting Vite dev server at http://localhost:5173"
+  echo "Make sure the app container is running: ./dev.sh up"
+  (cd "$THEME_DIR" && npm run dev)
+}
+
+theme-build() {
+  # Build theme assets for production
+  (cd "$THEME_DIR" && npm run build)
+}
+
+# JS linting (ESLint)
+theme-lint() {
+  (cd "$THEME_DIR" && npm run lint:js)
+}
+
+theme-lint-fix() {
+  (cd "$THEME_DIR" && npm run lint:js:fix)
+}
+
+# Formatting (Prettier — JS/CSS)
+theme-format() {
+  (cd "$THEME_DIR" && npm run format)
+}
+
+theme-format-check() {
+  (cd "$THEME_DIR" && npm run format:check)
+}
+
+# Blade formatting
+blade-format() {
+  # Auto-format all Blade templates
+  (cd "$THEME_DIR" && npm run format:blade)
+}
+
+blade-format-check() {
+  # Check Blade formatting without writing
+  (cd "$THEME_DIR" && npm run format:blade:check)
+}
+
+# =============================================================
+# Convenience
+# =============================================================
+
+nuke() {
+  # Remove all containers, volumes, and local images — start fresh
+  echo "WARNING: This will delete all containers AND database data."
+  read -r -p "Continue? [y/N] " confirm
+  [[ "${confirm,,}" == "y" ]] || { echo "Aborted."; return 1; }
+  $COMPOSE down -v --remove-orphans --rmi local
+}
+
+# =============================================================
+# Help
+# =============================================================
+
+help() {
+  cat <<'EOF'
+Usage: ./dev <command> [args]
+
+Docker Compose:
+  up [svc ...]        Start services detached
+  down                Stop and remove containers
+  stop [svc ...]      Stop without removing
+  restart [svc ...]   Restart service(s)
+  rebuild [svc ...]   Rebuild image(s) and restart
+  logs [svc]          Follow logs (all or specific service)
+  ps                  Show container status
+
+Container:
+  shell               sh in app container (www-data)
+  root-shell          sh in app container (root)
+
+WordPress:
+  wp <cmd>            Run WP-CLI   e.g. ./dev.sh wp plugin list
+
+PHP:
+  composer <cmd>      Run Composer inside app container
+  lint                PHP style check (Pint --test)
+  lint-fix            Auto-fix PHP style (Pint)
+  analyse             PHP static analysis (PHPStan)
+  test                Run Pest tests
+
+Database:
+  db                  Open MariaDB CLI
+  db-dump             Dump DB to stdout  (> dump.sql to save)
+  db-import <file>    Import a SQL file
+
+Theme (runs on host):
+  theme-install       npm ci in theme directory
+  theme-dev           Start Vite HMR dev server
+  theme-build         Build theme assets (production)
+  theme-npm <cmd>     Run any npm command in theme directory
+  theme-lint          ESLint check (JS)
+  theme-lint-fix      ESLint auto-fix (JS)
+  theme-format        Prettier write (JS + CSS)
+  theme-format-check  Prettier check without writing
+  blade-format        Format all Blade templates
+  blade-format-check  Check Blade formatting
+
+Misc:
+  nuke                Remove all containers + volumes (destructive)
+  help                Show this help
+EOF
+}
+
+# =============================================================
+# Entry point — dispatch when executed directly
+# =============================================================
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+  cmd="${1:-help}"
+  shift 2>/dev/null || true
+  "$cmd" "$@"
+fi

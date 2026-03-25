@@ -1,0 +1,38 @@
+# Version control
+.git
+.gitignore
+
+# Secrets — never bake into image
+.env
+.env.local
+.env.*.local
+
+# PHP vendor dirs — installed by Composer inside Docker
+vendor/
+web/app/themes/jussipress-theme/vendor/
+
+# WordPress core — installed by Composer inside Docker
+web/wp/
+
+# Node deps and built assets — built inside Docker
+web/app/themes/jussipress-theme/node_modules/
+web/app/themes/jussipress-theme/public/
+
+# User uploads — mounted as a volume at runtime
+web/app/uploads/
+
+# Logs & caches
+*.log
+web/app/debug.log
+
+# Dev / test artefacts
+tests/
+pint.json
+.phpunit*
+.editorconfig
+*.md
+LICENSE*
+
+# OS noise
+.DS_Store
+Thumbs.db

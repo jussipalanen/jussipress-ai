@@ -1,0 +1,76 @@
+services:
+
+  # -------------------------------------------------------
+  # Application — PHP 8.4 + nginx (single container)
+  # -------------------------------------------------------
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    image: jussipress-ai:local
+    ports:
+      - "8080:8080"
+    env_file: .env
+    environment:
+      DB_HOST: db
+      REDIS_HOST: redis
+    volumes:
+      - uploads:/var/www/html/web/app/uploads
+      # Mount the theme so the container sees the Vite `hot` file
+      # and picks up live PHP/Blade changes without rebuilding the image.
+      - ./web/app/themes/jussipress-theme:/var/www/html/web/app/themes/jussipress-theme
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # -------------------------------------------------------
+  # Database — MariaDB 11
+  # -------------------------------------------------------
+  db:
+    image: mariadb:11
+    environment:
+      MYSQL_DATABASE: ${DB_NAME:-wordpress}
+      MYSQL_USER: ${DB_USER:-wordpress}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-wordpress}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpassword}
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+  # -------------------------------------------------------
+  # Redis — object cache
+  # -------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    command: redis-server --save "" --appendonly no
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+  # -------------------------------------------------------
+  # RedisInsight — Redis browser UI at http://localhost:5540
+  # -------------------------------------------------------
+  redis-ui:
+    image: redis/redisinsight:latest
+    ports:
+      - "5540:5540"
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+volumes:
+  uploads:
+  db_data:

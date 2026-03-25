@@ -17,7 +17,14 @@
     }
   ],
   "keywords": [
-    "bedrock", "composer", "roots", "wordpress-composer", "wordpress", "wp-composer", "wp-config", "wp"
+    "bedrock",
+    "composer",
+    "roots",
+    "wordpress-composer",
+    "wordpress",
+    "wp-composer",
+    "wp-config",
+    "wp"
   ],
   "support": {
     "issues": "https://github.com/roots/bedrock/issues",
@@ -32,6 +39,14 @@
         "wp-plugin/*",
         "wp-theme/*"
       ]
+    },
+    {
+      "type": "composer",
+      "url": "https://wpackagist.org",
+      "only": [
+        "wpackagist-plugin/*",
+        "wpackagist-theme/*"
+      ]
     }
   ],
   "require": {
@@ -40,14 +55,17 @@
     "oscarotero/env": "^2.1",
     "roots/bedrock-autoloader": "^1.0",
     "roots/bedrock-disallow-indexing": "^2.0",
-    "roots/wordpress": "6.9.4",
-    "roots/wp-config": "1.0.0",
+    "roots/wordpress": "^6.9",
+    "roots/wp-config": "^1.0",
     "vlucas/phpdotenv": "^5.5",
+    "wpackagist-plugin/redis-cache": "^2.5",
     "wp-theme/twentytwentyfive": "^1.0"
   },
   "require-dev": {
     "laravel/pint": "^1.27",
-    "pestphp/pest": "^4.0"
+"pestphp/pest": "^4.0",
+    "phpstan/phpstan": "^2.0",
+    "szepeviktor/phpstan-wordpress": "^2.0"
   },
   "config": {
     "optimize-autoloader": true,
@@ -55,7 +73,8 @@
     "allow-plugins": {
       "composer/installers": true,
       "roots/wordpress-core-installer": true,
-      "pestphp/pest-plugin": true
+      "pestphp/pest-plugin": true,
+      "phpstan/extension-installer": true
     },
     "sort-packages": true
   },
@@ -78,6 +97,8 @@
   "scripts": {
     "lint": "pint --test",
     "lint:fix": "pint",
+    "analyse": "phpstan analyse --memory-limit=512M",
+    "fix": "pint",
     "test": "pest"
   }
 }

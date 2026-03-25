@@ -1,0 +1,31 @@
+includes:
+    - vendor/szepeviktor/phpstan-wordpress/extension.neon
+
+parameters:
+    level: 5
+
+    paths:
+        - config
+        - web/app/mu-plugins
+        - web/app/themes/jussipress-theme/app
+        - web/app/themes/jussipress-theme/functions.php
+
+    excludePaths:
+        - '*/vendor/*'
+        - web/wp
+        - web/app/plugins
+        - web/app/themes/twentytwentyfive
+        - web/app/mu-plugins/bedrock-disallow-indexing
+
+    # Bedrock loads WordPress via Composer — tell PHPStan where to find it
+    bootstrapFiles:
+        - web/app/themes/jussipress-theme/vendor/autoload.php
+
+    scanDirectories:
+        - vendor
+        - web/wp
+        - web/app/themes/jussipress-theme/vendor
+
+    ignoreErrors:
+        # Laravel/Acorn global helpers (collect, public_path, etc.) are registered at runtime
+        - '#Function (collect|public_path) not found\.#'
