@@ -98,6 +98,7 @@
     "lint": "pint --test",
     "lint:fix": "pint",
     "analyse": "phpstan analyse --memory-limit=512M",
+    "fix": "pint",
     "test": "pest"
   }
 }
