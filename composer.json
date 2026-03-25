@@ -39,6 +39,14 @@
         "wp-plugin/*",
         "wp-theme/*"
       ]
+    },
+    {
+      "type": "composer",
+      "url": "https://wpackagist.org",
+      "only": [
+        "wpackagist-plugin/*",
+        "wpackagist-theme/*"
+      ]
     }
   ],
   "require": {
@@ -50,6 +58,7 @@
     "roots/wordpress": "^6.9",
     "roots/wp-config": "^1.0",
     "vlucas/phpdotenv": "^5.5",
+    "wpackagist-plugin/redis-cache": "^2.5",
     "wp-theme/twentytwentyfive": "^1.0"
   },
   "require-dev": {

@@ -10,7 +10,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body @php(body_class())>
+<body @php(body_class('bg-brand-950 text-white'))>
     @php(wp_body_open())
 
     <div id="app">
@@ -20,7 +20,9 @@
 
         @include('sections.header')
 
-        <main id="main" class="main">
+        @yield('hero')
+
+        <main id="main" class="{{ $__env->hasSection('hero') ? '' : 'pt-16' }}">
             @yield('content')
         </main>
 

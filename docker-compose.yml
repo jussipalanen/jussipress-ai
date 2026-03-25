@@ -1,7 +1,7 @@
 services:
 
   # -------------------------------------------------------
-  # Application — PHP 8.3 + nginx (single container)
+  # Application — PHP 8.4 + nginx (single container)
   # -------------------------------------------------------
   app:
     build:
@@ -13,12 +13,17 @@ services:
       - "8080:8080"
     env_file: .env
     environment:
-      # Override DB_HOST so the app reaches the db service
       DB_HOST: db
+      REDIS_HOST: redis
     volumes:
       - uploads:/var/www/html/web/app/uploads
+      # Mount the theme so the container sees the Vite `hot` file
+      # and picks up live PHP/Blade changes without rebuilding the image.
+      - ./web/app/themes/jussipress-theme:/var/www/html/web/app/themes/jussipress-theme
     depends_on:
       db:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     restart: unless-stopped
 
@@ -43,12 +48,28 @@ services:
     restart: unless-stopped
 
   # -------------------------------------------------------
-  # Redis — object cache (optional, comment out to reduce cost)
+  # Redis — object cache
   # -------------------------------------------------------
-  # redis:
-  #   image: redis:7-alpine
-  #   command: redis-server --save "" --appendonly no
-  #   restart: unless-stopped
+  redis:
+    image: redis:7-alpine
+    command: redis-server --save "" --appendonly no
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+  # -------------------------------------------------------
+  # RedisInsight — Redis browser UI at http://localhost:5540
+  # -------------------------------------------------------
+  redis-ui:
+    image: redis/redisinsight:latest
+    ports:
+      - "5540:5540"
+    depends_on:
+      - redis
+    restart: unless-stopped
 
 volumes:
   uploads:

@@ -4,6 +4,9 @@ namespace App\View\Composers;
 
 use Roots\Acorn\View\Composer;
 
+/**
+ * App class
+ */
 class App extends Composer
 {
     /**

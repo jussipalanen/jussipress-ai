@@ -9,7 +9,7 @@ if (! process.env.APP_URL) {
 }
 
 export default defineConfig({
-  base: '/app/themes/sage/public/build/',
+  base: '/app/themes/jussipress-theme/public/build/',
   plugins: [
     tailwindcss(),
     laravel({
