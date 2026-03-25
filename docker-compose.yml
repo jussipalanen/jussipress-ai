@@ -14,7 +14,6 @@ services:
     env_file: .env
     environment:
       DB_HOST: db
-      REDIS_HOST: redis
     volumes:
       - uploads:/var/www/html/web/app/uploads
       # Mount the theme so the container sees the Vite `hot` file
@@ -22,8 +21,6 @@ services:
       - ./web/app/themes/jussipress-theme:/var/www/html/web/app/themes/jussipress-theme
     depends_on:
       db:
-        condition: service_healthy
-      redis:
         condition: service_healthy
     restart: unless-stopped
 
@@ -47,29 +44,6 @@ services:
       start_period: 30s
     restart: unless-stopped
 
-  # -------------------------------------------------------
-  # Redis — object cache
-  # -------------------------------------------------------
-  redis:
-    image: redis:7-alpine
-    command: redis-server --save "" --appendonly no
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-    restart: unless-stopped
-
-  # -------------------------------------------------------
-  # RedisInsight — Redis browser UI at http://localhost:5540
-  # -------------------------------------------------------
-  redis-ui:
-    image: redis/redisinsight:latest
-    ports:
-      - "5540:5540"
-    depends_on:
-      - redis
-    restart: unless-stopped
 
 volumes:
   uploads:

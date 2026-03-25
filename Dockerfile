@@ -70,36 +70,18 @@ RUN composer dump-autoload --no-dev --classmap-authoritative
 FROM php:${PHP_VERSION}-fpm-alpine AS production
 ARG THEME
 
-# ---- Permanent runtime libraries ----
+# ---- install-php-extensions: pre-built binaries, handles all deps + cleanup ----
+COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
+
+# ---- Runtime system packages ----
 RUN apk add --no-cache \
     nginx \
     supervisor \
     mysql-client \
-    curl \
-    freetype \
-    libjpeg-turbo \
-    libpng \
-    libzip \
-    libxml2 \
-    icu \
-    imagemagick \
-    oniguruma
+    curl
 
-# ---- Build-time deps (removed after compile) ----
-RUN apk add --no-cache --virtual .build-deps \
-    $PHPIZE_DEPS \
-    freetype-dev \
-    libjpeg-turbo-dev \
-    libpng-dev \
-    libzip-dev \
-    libxml2-dev \
-    icu-dev \
-    imagemagick-dev \
-    oniguruma-dev \
-    && docker-php-ext-configure gd \
-    --with-freetype \
-    --with-jpeg \
-    && docker-php-ext-install -j"$(nproc)" \
+# ---- PHP extensions (pre-built where possible — much faster than pecl/docker-php-ext-install) ----
+RUN install-php-extensions \
     gd \
     mysqli \
     pdo_mysql \
@@ -110,10 +92,7 @@ RUN apk add --no-cache --virtual .build-deps \
     exif \
     bcmath \
     opcache \
-    && pecl install redis imagick \
-    && docker-php-ext-enable redis imagick \
-    && apk del .build-deps \
-    && rm -rf /tmp/pear /var/cache/apk/*
+    imagick
 
 # ---- WP-CLI ----
 RUN curl -sS -o /usr/local/bin/wp \

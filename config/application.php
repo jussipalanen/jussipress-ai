@@ -147,15 +147,6 @@ Config::define('LOGGED_IN_SALT', env('LOGGED_IN_SALT'));
 Config::define('NONCE_SALT', env('NONCE_SALT'));
 
 /**
- * Redis object cache
- */
-Config::define('WP_REDIS_HOST', env('REDIS_HOST') ?: '127.0.0.1');
-Config::define('WP_REDIS_PORT', env('REDIS_PORT') ?: 6379);
-Config::define('WP_REDIS_DATABASE', env('REDIS_DATABASE') ?: 0);
-Config::define('WP_REDIS_TIMEOUT', 1);
-Config::define('WP_REDIS_READ_TIMEOUT', 1);
-
-/**
  * Custom Settings
  */
 Config::define('AUTOMATIC_UPDATER_DISABLED', true);

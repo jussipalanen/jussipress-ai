@@ -111,7 +111,7 @@ steps:
             --allow-unauthenticated \
             --min-instances=0 \
             --max-instances=3 \
-            --memory=512Mi \
+            --memory=1Gi \
             --cpu=1 \
             --port=8080 \
             --add-cloudsql-instances=$_CLOUDSQL_INSTANCE \
@@ -140,7 +140,8 @@ images:
   - $_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO/$_IMAGE:$COMMIT_SHA
   - $_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO/$_IMAGE:latest
 
+timeout: '1800s'   # 30 min — first build (no cache) takes ~10-15 min; default 10 min is too short
+
 options:
-  machineType: E2_MEDIUM   # cheapest machine that still builds quickly
-  workerPool: ''           # default pool — eu-north1 has no private pool requirement
-  logging: CLOUD_LOGGING_ONLY
+  machineType: E2_MEDIUM     # 2 vCPU — sufficient within the 30 min timeout; cheapest option
+logging: CLOUD_LOGGING_ONLY

@@ -183,8 +183,8 @@ gcloud auth login
 # Set the active project
 gcloud config set project client-jussimatic
 
-# Authorise Docker to push to Artifact Registry in eu-north1
-gcloud auth configure-docker eu-north1-docker.pkg.dev
+# Authorise Docker to push to Artifact Registry in europe-north1
+gcloud auth configure-docker europe-north1-docker.pkg.dev
 
 # Enable the required GCP APIs (one-time per project)
 gcloud services enable \
@@ -199,7 +199,7 @@ gcloud services enable \
 ```bash
 gcloud artifacts repositories create jussipress-ai \
   --repository-format=docker \
-  --location=eu-north1 \
+  --location=europe-north1 \
   --description="JussiPress AI container images"
 ```
 
@@ -209,7 +209,7 @@ Create a trigger in the GCP Console (or via `gcloud`) pointing to your repositor
 
 | Variable | Default | Description |
 |---|---|---|
-| `_REGION` | `eu-north1` | GCP region |
+| `_REGION` | `europe-north1` | GCP region |
 | `_REPO` | `jussipress-ai` | Artifact Registry repo name |
 | `_IMAGE` | `app` | Image name within the repo |
 | `_SERVICE` | `jussipress-ai` | Cloud Run service name |
@@ -221,7 +221,7 @@ Manually or via the Cloud Build trigger:
 ```bash
 gcloud builds submit \
   --config=cloudbuild.yaml \
-  --substitutions=_REGION=eu-north1
+  --substitutions=_REGION=europe-north1
 ```
 
 Kaniko caches layers in Artifact Registry between builds — subsequent builds are significantly faster.
@@ -232,8 +232,8 @@ Uncomment the deploy step in `cloudbuild.yaml`, or deploy manually:
 
 ```bash
 gcloud run deploy jussipress-ai \
-  --image=eu-north1-docker.pkg.dev/client-jussimatic/jussipress-ai/app:latest \
-  --region=eu-north1 \
+  --image=europe-north1-docker.pkg.dev/client-jussimatic/jussipress-ai/app:latest \
+  --region=europe-north1 \
   --platform=managed \
   --allow-unauthenticated \
   --min-instances=0 \

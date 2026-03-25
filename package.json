@@ -7,7 +7,14 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "./dev",
+    "build": "npm run theme -- build",
+    "lint": "npm run theme -- lint:js",
+    "lint:fix": "npm run theme -- lint:js:fix",
+    "format": "npm run theme -- format",
+    "format:check": "npm run theme -- format:check",
+    "fix": "npm run theme -- fix",
+    "theme": "npm --prefix web/app/themes/jussipress-theme run"
   },
   "author": "",
   "license": "ISC"
