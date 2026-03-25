@@ -59,10 +59,12 @@ substitutions:
   _REGION: eu-north1
   _REPO: jussipress-ai
   _IMAGE: app
-  _SERVICE: jussipress-ai                      # Cloud Run service name
-  _DOMAIN: example.com                         # override in trigger: your production domain
-  _CLOUDSQL_INSTANCE: PROJECT_ID:eu-north1:jussilog-db  # override with your project ID
-  _DEPLOY: 'false'                             # overridden to 'true' by the *-production tag trigger
+  _SERVICE: jussipress-ai-production                     # Cloud Run service name
+  _DOMAIN: ''              # set in trigger
+  _CLOUDSQL_INSTANCE: ''   # set in trigger: PROJECT_ID:region:instance
+  _DEPLOY: 'false'         # overridden to 'true' by the *-production tag trigger
+  _DB_NAME: ''             # set in trigger
+  _DB_USER: ''             # set in trigger
 
 steps:
   # --------------------------------------------------------
@@ -115,22 +117,22 @@ steps:
             --port=8080 \
             --add-cloudsql-instances=$_CLOUDSQL_INSTANCE \
             --set-env-vars="\
-WP_ENV=production,\
-WP_HOME=https://$_DOMAIN,\
-WP_SITEURL=https://$_DOMAIN/wp,\
-DB_HOST=/cloudsql/$_CLOUDSQL_INSTANCE" \
+            WP_ENV=production,\
+            WP_HOME=https://$_DOMAIN,\
+            WP_SITEURL=https://$_DOMAIN/wp,\
+            DB_HOST=/cloudsql/$_CLOUDSQL_INSTANCE,\
+            DB_NAME=$_DB_NAME,\
+            DB_USER=$_DB_USER" \
             --set-secrets="\
-DB_NAME=DB_NAME:latest,\
-DB_USER=DB_USER:latest,\
-DB_PASSWORD=DB_PASSWORD:latest,\
-AUTH_KEY=AUTH_KEY:latest,\
-SECURE_AUTH_KEY=SECURE_AUTH_KEY:latest,\
-LOGGED_IN_KEY=LOGGED_IN_KEY:latest,\
-NONCE_KEY=NONCE_KEY:latest,\
-AUTH_SALT=AUTH_SALT:latest,\
-SECURE_AUTH_SALT=SECURE_AUTH_SALT:latest,\
-LOGGED_IN_SALT=LOGGED_IN_SALT:latest,\
-NONCE_SALT=NONCE_SALT:latest"
+            DB_PASSWORD=JUSSIPRESS_AI_DB_PASSWORD:latest,\
+            AUTH_KEY=JUSSIPRESS_AI_AUTH_KEY:latest,\
+            SECURE_AUTH_KEY=JUSSIPRESS_AI_SECURE_AUTH_KEY:latest,\
+            LOGGED_IN_KEY=JUSSIPRESS_AI_LOGGED_IN_KEY:latest,\
+            NONCE_KEY=JUSSIPRESS_AI_NONCE_KEY:latest,\
+            AUTH_SALT=JUSSIPRESS_AI_AUTH_SALT:latest,\
+            SECURE_AUTH_SALT=JUSSIPRESS_AI_SECURE_AUTH_SALT:latest,\
+            LOGGED_IN_SALT=JUSSIPRESS_AI_LOGGED_IN_SALT:latest,\
+            NONCE_SALT=JUSSIPRESS_AI_NONCE_SALT:latest"
         else
           echo "Skipping deploy (_DEPLOY=$_DEPLOY). Push a *-production tag to deploy."
         fi
