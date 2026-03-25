@@ -1,0 +1,55 @@
+services:
+
+  # -------------------------------------------------------
+  # Application — PHP 8.3 + nginx (single container)
+  # -------------------------------------------------------
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    image: jussipress-ai:local
+    ports:
+      - "8080:8080"
+    env_file: .env
+    environment:
+      # Override DB_HOST so the app reaches the db service
+      DB_HOST: db
+    volumes:
+      - uploads:/var/www/html/web/app/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # -------------------------------------------------------
+  # Database — MariaDB 11
+  # -------------------------------------------------------
+  db:
+    image: mariadb:11
+    environment:
+      MYSQL_DATABASE: ${DB_NAME:-wordpress}
+      MYSQL_USER: ${DB_USER:-wordpress}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-wordpress}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpassword}
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+  # -------------------------------------------------------
+  # Redis — object cache (optional, comment out to reduce cost)
+  # -------------------------------------------------------
+  # redis:
+  #   image: redis:7-alpine
+  #   command: redis-server --save "" --appendonly no
+  #   restart: unless-stopped
+
+volumes:
+  uploads:
+  db_data:

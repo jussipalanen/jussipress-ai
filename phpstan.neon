@@ -1,0 +1,28 @@
+includes:
+    - vendor/szepeviktor/phpstan-wordpress/extension.neon
+
+parameters:
+    level: 5
+
+    paths:
+        - config
+        - web/app/mu-plugins
+        - web/app/themes/jussipress-theme/app
+        - web/app/themes/jussipress-theme/functions.php
+
+    excludePaths:
+        - '*/vendor/*'
+        - web/wp
+        - web/app/plugins
+        - web/app/themes/twentytwentyfive
+
+    # Bedrock loads WordPress via Composer — tell PHPStan where to find it
+    scanDirectories:
+        - vendor
+        - web/wp
+        - web/app/themes/jussipress-theme/vendor
+
+    # Suppress noisy WordPress patterns at this level
+    ignoreErrors:
+        # Dynamic WordPress hook callbacks are not always statically resolvable
+        - '#Call to function add_(action|filter)\(\) with .+ parameters#'

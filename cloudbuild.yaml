@@ -1,0 +1,70 @@
+# Google Cloud Build — Kaniko image build
+#
+# Required IAM roles for the Cloud Build service account
+# (PROJECT_NUMBER@cloudbuild.gserviceaccount.com):
+#   - roles/artifactregistry.writer   (push images)
+#   - roles/storage.admin             (Kaniko layer cache in GCS)
+#   - roles/run.admin                 (optional: Cloud Run deploy step)
+#   - roles/iam.serviceAccountUser    (optional: Cloud Run deploy step)
+#
+# One-time setup:
+#   gcloud artifacts repositories create $_REPO \
+#     --repository-format=docker \
+#     --location=$_REGION \
+#     --description="JussiPress AI images"
+
+substitutions:
+  _REGION: eu-north1
+  _REPO: jussipress-ai
+  _IMAGE: app
+  _SERVICE: jussipress-ai  # Cloud Run service name (used in deploy step)
+
+steps:
+  # --------------------------------------------------------
+  # Build & push with Kaniko (no Docker daemon needed)
+  # Kaniko reads source from /workspace (Cloud Build mount).
+  # Layer cache is stored in Artifact Registry under /cache.
+  # --------------------------------------------------------
+  - name: gcr.io/kaniko-project/executor:latest
+    args:
+      - --dockerfile=Dockerfile
+      - --context=dir:///workspace
+      - --destination=$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO/$_IMAGE:$COMMIT_SHA
+      - --destination=$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO/$_IMAGE:latest
+      # Kaniko layer cache — reuses layers between builds
+      - --cache=true
+      - --cache-repo=$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO/cache
+      - --cache-ttl=72h
+      # Faster snapshotting
+      - --snapshot-mode=redo
+      - --use-new-run
+
+  # --------------------------------------------------------
+  # Deploy to Cloud Run (uncomment when ready)
+  # Scales to zero by default → minimal cost when idle.
+  # --------------------------------------------------------
+  # - name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+  #   entrypoint: gcloud
+  #   args:
+  #     - run
+  #     - deploy
+  #     - $_SERVICE
+  #     - --image=$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO/$_IMAGE:$COMMIT_SHA
+  #     - --region=$_REGION
+  #     - --platform=managed
+  #     - --allow-unauthenticated
+  #     - --min-instances=0
+  #     - --max-instances=3
+  #     - --memory=512Mi
+  #     - --cpu=1
+  #     - --port=8080
+  #     - --set-env-vars=WP_ENV=production
+
+images:
+  - $_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO/$_IMAGE:$COMMIT_SHA
+  - $_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO/$_IMAGE:latest
+
+options:
+  machineType: E2_MEDIUM   # cheapest machine that still builds quickly
+  workerPool: ''           # default pool — eu-north1 has no private pool requirement
+  logging: CLOUD_LOGGING_ONLY
