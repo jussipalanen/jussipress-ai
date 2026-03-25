@@ -13,12 +13,43 @@
 #
 # Required IAM roles for the Cloud Build service account
 # (PROJECT_NUMBER@cloudbuild.gserviceaccount.com):
-#   - roles/artifactregistry.writer   (push images)
-#   - roles/storage.admin             (Kaniko layer cache in GCS)
-#   - roles/run.admin                 (deploy to Cloud Run)
-#   - roles/iam.serviceAccountUser    (act as Cloud Run service account)
+#   - roles/artifactregistry.writer      (push images)
+#   - roles/storage.admin                (Kaniko layer cache in GCS)
+#   - roles/run.admin                    (deploy to Cloud Run)
+#   - roles/iam.serviceAccountUser       (act as Cloud Run service account)
+#   - roles/secretmanager.secretAccessor (read secrets during deploy)
 #
-# One-time setup:
+# Required IAM roles for the Cloud Run service account
+# (PROJECT_NUMBER-compute@developer.gserviceaccount.com):
+#   - roles/cloudsql.client              (connect to Cloud SQL via Unix socket)
+#   - roles/secretmanager.secretAccessor (read secrets at runtime)
+#
+# One-time secret setup:
+#   echo -n "jussipress"  | gcloud secrets create DB_NAME     --data-file=-
+#   echo -n "value"       | gcloud secrets create DB_USER     --data-file=-
+#   echo -n "value"       | gcloud secrets create DB_PASSWORD --data-file=-
+#   echo -n "value"       | gcloud secrets create AUTH_KEY          --data-file=-
+#   echo -n "value"       | gcloud secrets create SECURE_AUTH_KEY   --data-file=-
+#   echo -n "value"       | gcloud secrets create LOGGED_IN_KEY     --data-file=-
+#   echo -n "value"       | gcloud secrets create NONCE_KEY         --data-file=-
+#   echo -n "value"       | gcloud secrets create AUTH_SALT         --data-file=-
+#   echo -n "value"       | gcloud secrets create SECURE_AUTH_SALT  --data-file=-
+#   echo -n "value"       | gcloud secrets create LOGGED_IN_SALT    --data-file=-
+#   echo -n "value"       | gcloud secrets create NONCE_SALT        --data-file=-
+#
+#   Note: DB_HOST is NOT a secret — it is derived from _CLOUDSQL_INSTANCE at deploy time.
+#
+# Grant Cloud Run service account access to each secret:
+#   export SA="PROJECT_NUMBER-compute@developer.gserviceaccount.com"
+#   for secret in DB_NAME DB_USER DB_PASSWORD \
+#     AUTH_KEY SECURE_AUTH_KEY LOGGED_IN_KEY NONCE_KEY \
+#     AUTH_SALT SECURE_AUTH_SALT LOGGED_IN_SALT NONCE_SALT; do
+#     gcloud secrets add-iam-policy-binding $secret \
+#       --member="serviceAccount:$SA" \
+#       --role="roles/secretmanager.secretAccessor"
+#   done
+#
+# One-time Artifact Registry setup:
 #   gcloud artifacts repositories create $_REPO \
 #     --repository-format=docker \
 #     --location=$_REGION \
@@ -28,8 +59,10 @@ substitutions:
   _REGION: eu-north1
   _REPO: jussipress-ai
   _IMAGE: app
-  _SERVICE: jussipress-ai  # Cloud Run service name
-  _DEPLOY: 'false'         # overridden to 'true' by the *-production tag trigger
+  _SERVICE: jussipress-ai                      # Cloud Run service name
+  _DOMAIN: example.com                         # override in trigger: your production domain
+  _CLOUDSQL_INSTANCE: PROJECT_ID:eu-north1:jussilog-db  # override with your project ID
+  _DEPLOY: 'false'                             # overridden to 'true' by the *-production tag trigger
 
 steps:
   # --------------------------------------------------------
@@ -58,6 +91,11 @@ steps:
   # Deploy to Cloud Run — runs only when $_DEPLOY=true
   # Set by the *-production tag trigger substitution.
   # Scales to zero by default → minimal cost when idle.
+  #
+  # Cloud SQL connection: --add-cloudsql-instances makes the
+  # Unix socket available at /cloudsql/<instance-connection-name>
+  # DB_HOST is set to that socket path so WordPress connects
+  # without exposing a public IP.
   # --------------------------------------------------------
   - name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
     entrypoint: bash
@@ -75,7 +113,24 @@ steps:
             --memory=512Mi \
             --cpu=1 \
             --port=8080 \
-            --set-env-vars=WP_ENV=production
+            --add-cloudsql-instances=$_CLOUDSQL_INSTANCE \
+            --set-env-vars="\
+WP_ENV=production,\
+WP_HOME=https://$_DOMAIN,\
+WP_SITEURL=https://$_DOMAIN/wp,\
+DB_HOST=/cloudsql/$_CLOUDSQL_INSTANCE" \
+            --set-secrets="\
+DB_NAME=DB_NAME:latest,\
+DB_USER=DB_USER:latest,\
+DB_PASSWORD=DB_PASSWORD:latest,\
+AUTH_KEY=AUTH_KEY:latest,\
+SECURE_AUTH_KEY=SECURE_AUTH_KEY:latest,\
+LOGGED_IN_KEY=LOGGED_IN_KEY:latest,\
+NONCE_KEY=NONCE_KEY:latest,\
+AUTH_SALT=AUTH_SALT:latest,\
+SECURE_AUTH_SALT=SECURE_AUTH_SALT:latest,\
+LOGGED_IN_SALT=LOGGED_IN_SALT:latest,\
+NONCE_SALT=NONCE_SALT:latest"
         else
           echo "Skipping deploy (_DEPLOY=$_DEPLOY). Push a *-production tag to deploy."
         fi
