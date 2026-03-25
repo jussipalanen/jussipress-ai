@@ -86,6 +86,7 @@ RUN apk upgrade --no-cache
 RUN apk add --no-cache \
     nginx \
     supervisor \
+    netcat-openbsd \
     mysql-client \
     curl \
     freetype \
