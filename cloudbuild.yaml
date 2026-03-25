@@ -80,7 +80,6 @@ steps:
       - --context=dir:///workspace
       - --destination=$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO/$_IMAGE:$COMMIT_SHA
       - --destination=$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO/$_IMAGE:latest
-      - --destination=$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO/$_IMAGE:${TAG_NAME:-dev}
       # Kaniko layer cache — reuses layers between builds
       - --cache=true
       - --cache-repo=$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO/cache
