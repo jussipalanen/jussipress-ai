@@ -220,7 +220,7 @@ nuke() {
 
 help() {
   cat <<'EOF'
-Usage: ./dev.sh <command> [args]
+Usage: ./dev <command> [args]
 
 Docker Compose:
   up [svc ...]        Start services detached

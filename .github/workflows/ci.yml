@@ -1,0 +1,100 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+# Cancel in-progress runs for the same branch/PR
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  THEME_DIR: web/app/themes/jussipress-theme
+
+jobs:
+  # ============================================================
+  # PHP — validate, lint, static analysis, tests
+  # ============================================================
+  php:
+    name: PHP
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, xml, zip, intl, bcmath
+          coverage: none
+          tools: composer:v2
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            vendor
+            ${{ env.THEME_DIR }}/vendor
+          key: composer-${{ hashFiles('composer.lock', 'web/app/themes/jussipress-theme/composer.lock') }}
+          restore-keys: composer-
+
+      - name: Validate composer.json
+        run: composer validate --strict
+
+      - name: Install root dependencies
+        run: composer install --prefer-dist --no-scripts --no-progress
+
+      - name: Install theme dependencies
+        run: composer install --prefer-dist --no-scripts --no-progress
+        working-directory: ${{ env.THEME_DIR }}
+
+      - name: Lint — PHP code style (Pint)
+        run: composer lint
+
+      - name: Analyse — PHP static analysis (PHPStan)
+        run: composer analyse
+
+      - name: Test — Pest
+        run: composer test
+
+  # ============================================================
+  # JS / CSS / Blade — lint, format check, build
+  # ============================================================
+  js:
+    name: JS & Blade
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web/app/themes/jussipress-theme
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: web/app/themes/jussipress-theme/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint — ESLint (JS)
+        run: npm run lint:js
+
+      - name: Lint — Prettier check (JS + CSS)
+        run: npm run format:check
+
+      - name: Lint — Blade formatter check
+        run: npm run format:blade:check
+
+      - name: Build — Vite production build
+        run: npm run build
+        env:
+          APP_URL: http://localhost:8080
+          NODE_ENV: production

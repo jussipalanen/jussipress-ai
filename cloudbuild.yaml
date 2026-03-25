@@ -1,11 +1,22 @@
-# Google Cloud Build — Kaniko image build
+# Google Cloud Build — Kaniko image build + Cloud Run deploy
+#
+# Triggers:
+#   - Any branch push: builds and pushes image (no deploy)
+#   - Tag matching *-production: builds, pushes, and deploys to Cloud Run
+#
+# One-time trigger setup:
+#   gcloud builds triggers create cloud-source-repositories \
+#     --name=deploy-production \
+#     --repo=jussipress-ai \
+#     --tag-pattern=".*-production" \
+#     --build-config=cloudbuild.yaml
 #
 # Required IAM roles for the Cloud Build service account
 # (PROJECT_NUMBER@cloudbuild.gserviceaccount.com):
 #   - roles/artifactregistry.writer   (push images)
 #   - roles/storage.admin             (Kaniko layer cache in GCS)
-#   - roles/run.admin                 (optional: Cloud Run deploy step)
-#   - roles/iam.serviceAccountUser    (optional: Cloud Run deploy step)
+#   - roles/run.admin                 (deploy to Cloud Run)
+#   - roles/iam.serviceAccountUser    (act as Cloud Run service account)
 #
 # One-time setup:
 #   gcloud artifacts repositories create $_REPO \
@@ -17,13 +28,16 @@ substitutions:
   _REGION: eu-north1
   _REPO: jussipress-ai
   _IMAGE: app
-  _SERVICE: jussipress-ai  # Cloud Run service name (used in deploy step)
+  _SERVICE: jussipress-ai  # Cloud Run service name
+  _DEPLOY: 'false'         # overridden to 'true' by the *-production tag trigger
 
 steps:
   # --------------------------------------------------------
   # Build & push with Kaniko (no Docker daemon needed)
   # Kaniko reads source from /workspace (Cloud Build mount).
   # Layer cache is stored in Artifact Registry under /cache.
+  # $TAG_NAME is set automatically by Cloud Build when triggered
+  # by a Git tag; empty string on branch-push triggers.
   # --------------------------------------------------------
   - name: gcr.io/kaniko-project/executor:latest
     args:
@@ -31,6 +45,7 @@ steps:
       - --context=dir:///workspace
       - --destination=$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO/$_IMAGE:$COMMIT_SHA
       - --destination=$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO/$_IMAGE:latest
+      - --destination=$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO/$_IMAGE:${TAG_NAME:-dev}
       # Kaniko layer cache — reuses layers between builds
       - --cache=true
       - --cache-repo=$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO/cache
@@ -40,25 +55,30 @@ steps:
       - --use-new-run
 
   # --------------------------------------------------------
-  # Deploy to Cloud Run (uncomment when ready)
+  # Deploy to Cloud Run — runs only when $_DEPLOY=true
+  # Set by the *-production tag trigger substitution.
   # Scales to zero by default → minimal cost when idle.
   # --------------------------------------------------------
-  # - name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
-  #   entrypoint: gcloud
-  #   args:
-  #     - run
-  #     - deploy
-  #     - $_SERVICE
-  #     - --image=$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO/$_IMAGE:$COMMIT_SHA
-  #     - --region=$_REGION
-  #     - --platform=managed
-  #     - --allow-unauthenticated
-  #     - --min-instances=0
-  #     - --max-instances=3
-  #     - --memory=512Mi
-  #     - --cpu=1
-  #     - --port=8080
-  #     - --set-env-vars=WP_ENV=production
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        if [ "$_DEPLOY" = "true" ]; then
+          gcloud run deploy $_SERVICE \
+            --image=$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO/$_IMAGE:$COMMIT_SHA \
+            --region=$_REGION \
+            --platform=managed \
+            --allow-unauthenticated \
+            --min-instances=0 \
+            --max-instances=3 \
+            --memory=512Mi \
+            --cpu=1 \
+            --port=8080 \
+            --set-env-vars=WP_ENV=production
+        else
+          echo "Skipping deploy (_DEPLOY=$_DEPLOY). Push a *-production tag to deploy."
+        fi
 
 images:
   - $_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO/$_IMAGE:$COMMIT_SHA

@@ -1,4 +1,4 @@
-# JussiPress AI
+# JussiPress AI - WordPress site
 
 A modern WordPress project built on [Roots Bedrock](https://roots.io/bedrock/) and the [Sage](https://roots.io/sage/) starter theme, containerised for [Google Cloud Platform](https://cloud.google.com/) with a focus on minimal infrastructure cost.
 
@@ -172,6 +172,28 @@ logs app
 
 ## Production (GCP)
 
+### 0. Authenticate and configure project
+
+Install the [Google Cloud CLI](https://cloud.google.com/sdk/docs/install) if you haven't already, then:
+
+```bash
+# Log in with your Google account
+gcloud auth login
+
+# Set the active project
+gcloud config set project client-jussimatic
+
+# Authorise Docker to push to Artifact Registry in eu-north1
+gcloud auth configure-docker eu-north1-docker.pkg.dev
+
+# Enable the required GCP APIs (one-time per project)
+gcloud services enable \
+  cloudbuild.googleapis.com \
+  run.googleapis.com \
+  artifactregistry.googleapis.com \
+  secretmanager.googleapis.com
+```
+
 ### 1. Create Artifact Registry repository
 
 ```bash
@@ -210,7 +232,7 @@ Uncomment the deploy step in `cloudbuild.yaml`, or deploy manually:
 
 ```bash
 gcloud run deploy jussipress-ai \
-  --image=eu-north1-docker.pkg.dev/PROJECT_ID/jussipress-ai/app:latest \
+  --image=eu-north1-docker.pkg.dev/client-jussimatic/jussipress-ai/app:latest \
   --region=eu-north1 \
   --platform=managed \
   --allow-unauthenticated \

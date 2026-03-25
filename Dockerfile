@@ -18,7 +18,8 @@ RUN apk upgrade --no-cache
 WORKDIR /build
 
 COPY web/app/themes/${THEME}/package*.json ./
-RUN npm ci --prefer-offline
+# Use ci for reproducible installs when lockfile exists, install otherwise
+RUN if [ -f package-lock.json ]; then npm ci; else npm install; fi
 
 COPY web/app/themes/${THEME}/ ./
 RUN npm run build
@@ -93,7 +94,8 @@ RUN apk add --no-cache \
     libzip \
     libxml2 \
     icu \
-    imagemagick
+    imagemagick \
+    oniguruma
 
 # ---- Build-time deps (removed after compile) ----
 RUN apk add --no-cache --virtual .build-deps \
@@ -105,6 +107,7 @@ RUN apk add --no-cache --virtual .build-deps \
     libxml2-dev \
     icu-dev \
     imagemagick-dev \
+    oniguruma-dev \
     && docker-php-ext-configure gd \
     --with-freetype \
     --with-jpeg \
