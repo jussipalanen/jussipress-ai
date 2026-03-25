@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-03-26
+
+### Added
+
+- WP Stateless 4.4.1 plugin for GCS media offload — uploads stored in `jussipress-bucket` instead of the ephemeral container filesystem
+- SMTP mu-plugin for transactional email
+
+### Fixed
+
+- Cloud Build: removed `images:` block incompatible with Kaniko's direct-push model (was causing false build failures)
+- Cloud Build: `_DEPLOY` now defaults to `true` so every build deploys to Cloud Run automatically
+- Cloud Run: corrected `_CLOUDSQL_INSTANCE` region from `eu-north1` to `europe-north1`
+
 ## [1.0.0] - 2026-03-25
 
 ### Added

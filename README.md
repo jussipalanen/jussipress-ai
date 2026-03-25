@@ -5,7 +5,7 @@ A modern WordPress project built on [Roots Bedrock](https://roots.io/bedrock/) a
 **Stack**
 - WordPress 6.9 managed by Composer (Bedrock)
 - Sage theme with [Acorn](https://roots.io/acorn/) (Laravel in WordPress), Blade templating, Tailwind CSS v4, Vite 8
-- PHP 8.3 + nginx + supervisord (single container)
+- PHP 8.4 + nginx + supervisord (single container)
 - MariaDB 11
 - GCP Cloud Run + Cloud Build (Kaniko) + Artifact Registry
 
@@ -19,8 +19,8 @@ A modern WordPress project built on [Roots Bedrock](https://roots.io/bedrock/) a
 |---|---|
 | Docker Engine + Compose v2 | latest |
 | Node.js | `^20.19.0` or `>=22.12.0` |
-| PHP | `>=8.3` (for running Composer/tools on host) |
-| Composer | `^2` |
+| PHP | `8.4` (must match Dockerfile — lock file is pinned to PHP 8.4) |
+| Composer | `^2.9` |
 
 > PHP and Composer are only needed on the host for IDE tooling (PHPStan, Pint). The application itself runs entirely in Docker.
 
@@ -85,7 +85,7 @@ cd web/app/themes/jussipress-theme && npm ci && cd -
 ```
 
 This starts:
-- `app` — PHP 8.3-FPM + nginx on `http://localhost:8080`
+- `app` — PHP 8.4-FPM + nginx on `http://localhost:8080`
 - `db` — MariaDB 11
 
 ### 4. Install WordPress
@@ -212,7 +212,12 @@ Create a trigger in the GCP Console (or via `gcloud`) pointing to your repositor
 | `_REGION` | `europe-north1` | GCP region |
 | `_REPO` | `jussipress-ai` | Artifact Registry repo name |
 | `_IMAGE` | `app` | Image name within the repo |
-| `_SERVICE` | `jussipress-ai` | Cloud Run service name |
+| `_SERVICE` | `jussipress-ai-production` | Cloud Run service name |
+| `_DEPLOY` | `true` | Set to `false` in trigger to skip deploy |
+| `_CLOUDSQL_INSTANCE` | *(set in trigger)* | Cloud SQL connection name, e.g. `project:region:instance` |
+| `_DOMAIN` | *(set in trigger)* | Cloud Run service domain |
+| `_DB_NAME` | *(set in trigger)* | Database name |
+| `_DB_USER` | *(set in trigger)* | Database user |
 
 ### 3. Build and push the image
 
@@ -228,7 +233,7 @@ Kaniko caches layers in Artifact Registry between builds — subsequent builds a
 
 ### 4. Deploy to Cloud Run
 
-Uncomment the deploy step in `cloudbuild.yaml`, or deploy manually:
+Every build deploys automatically (`_DEPLOY=true`). To deploy manually:
 
 ```bash
 gcloud run deploy jussipress-ai \
@@ -248,7 +253,15 @@ gcloud run deploy jussipress-ai \
 
 ### 5. Uploads / media
 
-Persistent media uploads (`web/app/uploads/`) must be stored on an external volume since Cloud Run containers are stateless. Mount a [Cloud Storage FUSE](https://cloud.google.com/run/docs/tutorials/network-filesystems-fuse) bucket or use an offload plugin (e.g. WP Offload Media) pointing to a GCS bucket.
+Persistent media uploads (`web/app/uploads/`) must be stored externally since Cloud Run containers are stateless. This project uses [WP Stateless](https://wordpress.org/plugins/wp-stateless/) to offload all media to the `jussipress-bucket` GCS bucket. Configure it in **Settings → StatelessMedia** after first deploy — no JSON key needed, Cloud Run authenticates via the default service account.
+
+Ensure the Cloud Run service account has access to the bucket:
+
+```bash
+gcloud storage buckets add-iam-policy-binding gs://jussipress-bucket \
+  --member="serviceAccount:PROJECT_NUMBER-compute@developer.gserviceaccount.com" \
+  --role="roles/storage.objectAdmin"
+```
 
 ---
 
