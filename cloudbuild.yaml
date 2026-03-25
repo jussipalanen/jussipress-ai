@@ -136,10 +136,6 @@ steps:
           echo "Skipping deploy (_DEPLOY=$_DEPLOY). Push a *-production tag to deploy."
         fi
 
-images:
-  - $_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO/$_IMAGE:$COMMIT_SHA
-  - $_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO/$_IMAGE:latest
-
 timeout: '1800s'   # 30 min — first build (no cache) takes ~10-15 min; default 10 min is too short
 
 options:
