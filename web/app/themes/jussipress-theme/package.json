@@ -13,7 +13,7 @@
     "format": "prettier --write \"resources/{js,css}/**\"",
     "format:check": "prettier --check \"resources/{js,css}/**\"",
     "format:blade": "blade-formatter --write \"resources/views/**/*.blade.php\"",
-    "format:blade:check": "blade-formatter --check-result \"resources/views/**/*.blade.php\"",
+    "format:blade:check": "blade-formatter --check \"resources/views/**/*.blade.php\"",
     "translate": "npm run translate:pot && npm run translate:update",
     "translate:pot": "wp i18n make-pot . ./resources/lang/sage.pot --include=\"theme.json,patterns,app,resources\"",
     "translate:update": "for file in ./resources/lang/*.po; do wp i18n update-po ./resources/lang/sage.pot $file; done",
