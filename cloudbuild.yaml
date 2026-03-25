@@ -144,4 +144,4 @@ timeout: '1800s'   # 30 min — first build (no cache) takes ~10-15 min; default
 
 options:
   machineType: E2_MEDIUM     # 2 vCPU — sufficient within the 30 min timeout; cheapest option
-logging: CLOUD_LOGGING_ONLY
+  logging: CLOUD_LOGGING_ONLY
