@@ -12,9 +12,6 @@ ARG COMPOSER_VERSION=2
 FROM node:${NODE_VERSION}-alpine AS assets
 ARG THEME
 
-# Apply OS security patches
-RUN apk upgrade --no-cache --no-scripts
-
 WORKDIR /build
 
 COPY web/app/themes/${THEME}/package*.json ./
@@ -29,9 +26,6 @@ RUN npm run build
 # Stage 2 — Root PHP vendor (Composer)
 # =============================================================
 FROM composer:${COMPOSER_VERSION} AS vendor
-
-# Apply OS security patches
-RUN apk upgrade --no-cache --no-scripts
 
 WORKDIR /app
 
@@ -55,9 +49,6 @@ RUN composer dump-autoload --no-dev --classmap-authoritative
 FROM composer:${COMPOSER_VERSION} AS theme-vendor
 ARG THEME
 
-# Apply OS security patches
-RUN apk upgrade --no-cache --no-scripts
-
 WORKDIR /theme
 
 COPY web/app/themes/${THEME}/composer.json \
@@ -78,9 +69,6 @@ RUN composer dump-autoload --no-dev --classmap-authoritative
 # =============================================================
 FROM php:${PHP_VERSION}-fpm-alpine AS production
 ARG THEME
-
-# Apply OS security patches first
-RUN apk upgrade --no-cache --no-scripts
 
 # ---- Permanent runtime libraries ----
 RUN apk add --no-cache \
