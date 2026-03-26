@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2026-03-26
+
+### Changed
+
+- Cloud Run: `--min-instances` raised from 0 to 1 for 24/7 availability and to eliminate cold start 502s
+- Cloud Run: memory reduced from 1Gi to 512Mi with `--cpu-throttling` enabled to lower idle costs
+- PHP: `opcache.memory_consumption` reduced from 256 to 128 to fit within the 512Mi memory limit
+
 ## [1.1.0] - 2026-03-26
 
 ### Added

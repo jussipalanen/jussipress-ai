@@ -22,7 +22,7 @@
 
         @yield('hero')
 
-        <main id="main" class="{{ $__env->hasSection('hero') ? '' : 'pt-16' }}">
+        <main id="main">
             @yield('content')
         </main>
 

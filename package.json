@@ -17,5 +17,8 @@
     "theme": "npm --prefix web/app/themes/jussipress-theme run"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "sass": "^1.98.0"
+  }
 }

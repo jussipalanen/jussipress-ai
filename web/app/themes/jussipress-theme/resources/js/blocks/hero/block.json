@@ -1,0 +1,51 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "jussipress/hero",
+  "title": "Hero",
+  "category": "theme",
+  "icon": "cover-image",
+  "description": "A full-width hero section with background, title, description and a button.",
+  "keywords": ["hero", "banner", "cover"],
+  "textdomain": "sage",
+  "attributes": {
+    "title": {
+      "type": "string",
+      "source": "html",
+      "selector": ".hero__title"
+    },
+    "description": {
+      "type": "string",
+      "source": "html",
+      "selector": ".hero__description"
+    },
+    "buttonText": {
+      "type": "string",
+      "default": "Get started"
+    },
+    "buttonUrl": {
+      "type": "string",
+      "default": ""
+    },
+    "backgroundType": {
+      "type": "string",
+      "default": "color"
+    },
+    "backgroundImage": {
+      "type": "object",
+      "default": {}
+    },
+    "overlayOpacity": {
+      "type": "number",
+      "default": 50
+    },
+    "align": {
+      "type": "string",
+      "default": "full"
+    }
+  },
+  "supports": {
+    "html": false,
+    "align": ["full", "wide"]
+  }
+}

@@ -9,6 +9,15 @@ namespace App;
 use Illuminate\Support\Facades\Vite;
 
 /**
+ * Register custom theme blocks.
+ *
+ * @return void
+ */
+add_action('init', function () {
+    register_block_type(get_theme_file_path('resources/js/blocks/hero/block.json'));
+});
+
+/**
  * Inject styles into the block editor.
  *
  * @return array
@@ -114,6 +123,11 @@ add_action('after_setup_theme', function () {
      * @link https://developer.wordpress.org/block-editor/how-to-guides/themes/theme-support/#responsive-embedded-content
      */
     add_theme_support('responsive-embeds');
+
+    /**
+     * Enable wide and full alignment for blocks.
+     */
+    add_theme_support('align-wide');
 
     /**
      * Enable HTML5 markup support.

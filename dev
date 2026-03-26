@@ -1,9 +1,20 @@
 #!/usr/bin/env bash
 # Local dev: starts docker-compose stack + Vite HMR in parallel.
-# Usage: ./dev.sh
+# Usage: ./dev [wp <args>]
 set -euo pipefail
 
 THEME_DIR="web/app/themes/jussipress-theme"
+
+# Proxy wp-cli commands into the app container
+if [[ "${1:-}" == "wp" ]]; then
+  shift
+  if ! docker compose ps --status running app | grep -q app; then
+    echo "Error: stack is not running. Start it first with ./dev"
+    exit 1
+  fi
+  docker compose exec app wp --allow-root "$@"
+  exit $?
+fi
 
 cleanup() {
   echo ""

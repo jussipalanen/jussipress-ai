@@ -4,7 +4,7 @@ import laravel from 'laravel-vite-plugin'
 import { wordpressPlugin, wordpressThemeJson } from '@roots/vite-plugin';
 
 // Set APP_URL if it doesn't exist for Laravel Vite plugin
-if (! process.env.APP_URL) {
+if (!process.env.APP_URL) {
   process.env.APP_URL = 'http://example.test';
 }
 
@@ -34,6 +34,10 @@ export default defineConfig({
       disableTailwindBorderRadius: false,
     }),
   ],
+  esbuild: {
+    jsxFactory: 'wp.element.createElement',
+    jsxFragment: 'wp.element.Fragment',
+  },
   resolve: {
     alias: {
       '@scripts': '/resources/js',
