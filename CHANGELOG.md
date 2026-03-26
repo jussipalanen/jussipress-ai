@@ -5,7 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.1.1] - 2026-03-26
+## [1.3.0] - 2026-03-26
+
+### Added
+
+- Hero Gutenberg block (`jussipress/hero`) with editable title, description, button, background colour/image, overlay opacity, and full-width/wide alignment support
+- Hero block styles extracted to `resources/css/blocks/hero.css` and imported from `app.css`
+- Editor styles for heading sizes and hero block preview in `editor.css`
+- WP-CLI shorthand in `dev` script — `./dev wp <command>` proxies into the running app container
+- Gutenberg block registration via `register_block_type()` in `setup.php`
+- `align-wide` theme support and `wideSize: 80rem` in `theme.json`
+- JSX support for block components via `@jsxRuntime classic` pragma and `wp.element.createElement`
+- ESLint JSX support for `.jsx` files
+
+### Changed
+
+- Entry content layout uses a breakout pattern — all blocks constrained to `48rem` by default, `alignwide` breaks to `80rem`, `alignfull` to `100%`
+- Page header automatically hidden when the first block on a page is the hero block
+- `<main>` element no longer adds `pt-8`; page-header `pt-16` handles nav offset on its own
+- Hero `padding-top` accounts for the fixed nav height (`calc(4rem + 5rem)`)
+- Hamburger menu button now toggles — clicking it while the menu is open closes it
+- Vite config adds `esbuild.jsxFactory` and `jsxFragment` for WordPress element system
+
+### Fixed
+
+- Block quote, pre, figure, hr, and pullquote margins changed from shorthand `margin: X 0` to explicit `margin-top`/`margin-bottom` to preserve auto horizontal margins from the breakout layout
+- Hero full-width alignment uses `width: 100%` instead of `100vw` to avoid horizontal overflow caused by scrollbar width
+
+## [1.2.0] - 2026-03-26
 
 ### Changed
 
