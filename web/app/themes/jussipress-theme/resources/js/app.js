@@ -21,7 +21,9 @@ document.addEventListener('DOMContentLoaded', () => {
     openBtn.focus()
   }
 
-  openBtn.addEventListener('click', openMenu)
+  openBtn.addEventListener('click', () => {
+    megamenu.getAttribute('aria-hidden') === 'false' ? closeMenu() : openMenu()
+  })
   closeBtn.addEventListener('click', closeMenu)
 
   document.addEventListener('keydown', e => {

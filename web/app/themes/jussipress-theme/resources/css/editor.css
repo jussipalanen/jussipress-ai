@@ -1,1 +1,100 @@
 @import 'tailwindcss';
+
+/* ─── Hero block (editor preview) ──────────────────────────────── */
+.editor-styles-wrapper .hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  padding: 5rem 1.5rem;
+  background-color: #071530;
+  background-size: cover;
+  background-position: center;
+  text-align: center;
+  overflow: hidden;
+}
+
+.editor-styles-wrapper .hero__overlay {
+  position: absolute;
+  inset: 0;
+  background-color: #030b1a;
+  pointer-events: none;
+}
+
+.editor-styles-wrapper .hero__inner {
+  position: relative;
+  max-width: 48rem;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.editor-styles-wrapper .hero__title {
+  color: #ffffff;
+  font-size: 3.5rem;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  margin: 0;
+}
+
+.editor-styles-wrapper .hero__description {
+  color: #93bef2;
+  font-size: 1.125rem;
+  line-height: 1.7;
+  max-width: 36rem;
+  margin: 0;
+}
+
+.editor-styles-wrapper .hero__actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  margin-top: 0.5rem;
+}
+
+.editor-styles-wrapper .hero__button {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.75rem 2rem;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+  background-color: #1e4d9b;
+  color: #ffffff;
+}
+
+/* ─── Editor heading sizes ──────────────────────────────────────── */
+.editor-styles-wrapper h1,
+.editor-styles-wrapper h2,
+.editor-styles-wrapper h3,
+.editor-styles-wrapper h4,
+.editor-styles-wrapper h5,
+.editor-styles-wrapper h6 {
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+}
+
+.editor-styles-wrapper h1 {
+  font-size: 3rem;
+}
+.editor-styles-wrapper h2 {
+  font-size: 2.25rem;
+}
+.editor-styles-wrapper h3 {
+  font-size: 1.75rem;
+}
+.editor-styles-wrapper h4 {
+  font-size: 1.375rem;
+}
+.editor-styles-wrapper h5 {
+  font-size: 1.125rem;
+}
+.editor-styles-wrapper h6 {
+  font-size: 1rem;
+}

@@ -6,11 +6,14 @@ export default [
   js.configs.recommended,
 
   {
-    files: ['resources/js/**/*.{js,mjs}'],
+    files: ['resources/js/**/*.{js,mjs,jsx}'],
 
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',
+      parserOptions: {
+        ecmaFeatures: { jsx: true },
+      },
       globals: {
         // Browser environment
         ...globals.browser,
