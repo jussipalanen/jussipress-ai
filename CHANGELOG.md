@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.3.0] - 2026-03-26
+## [1.2.0] - 2026-03-26
 
 ### Added
 
@@ -20,6 +20,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Cloud Run: `--min-instances` raised from 0 to 1 for 24/7 availability and to eliminate cold start 502s
+- Cloud Run: memory reduced from 1Gi to 512Mi with `--cpu-throttling` enabled to lower idle costs
+- PHP: `opcache.memory_consumption` reduced from 256 to 128 to fit within the 512Mi memory limit
 - Entry content layout uses a breakout pattern — all blocks constrained to `48rem` by default, `alignwide` breaks to `80rem`, `alignfull` to `100%`
 - Page header automatically hidden when the first block on a page is the hero block
 - `<main>` element no longer adds `pt-8`; page-header `pt-16` handles nav offset on its own
@@ -32,13 +35,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Block quote, pre, figure, hr, and pullquote margins changed from shorthand `margin: X 0` to explicit `margin-top`/`margin-bottom` to preserve auto horizontal margins from the breakout layout
 - Hero full-width alignment uses `width: 100%` instead of `100vw` to avoid horizontal overflow caused by scrollbar width
 
-## [1.2.0] - 2026-03-26
-
-### Changed
-
-- Cloud Run: `--min-instances` raised from 0 to 1 for 24/7 availability and to eliminate cold start 502s
-- Cloud Run: memory reduced from 1Gi to 512Mi with `--cpu-throttling` enabled to lower idle costs
-- PHP: `opcache.memory_consumption` reduced from 256 to 128 to fit within the 512Mi memory limit
 
 ## [1.1.0] - 2026-03-26
 
