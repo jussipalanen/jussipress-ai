@@ -1,6 +1,6 @@
 /** @jsxRuntime classic */
 /** @jsx wp.element.createElement */
-import { useBlockProps, RichText } from '@wordpress/block-editor'
+import { useBlockProps } from '@wordpress/block-editor'
 
 export default function Save({ attributes }) {
   const {
@@ -23,24 +23,13 @@ export default function Save({ attributes }) {
   return (
     <section {...blockProps} style={sectionStyle}>
       {backgroundType === 'image' && backgroundImage?.url && (
-        <div
-          className="hero__overlay"
-          style={{ opacity: overlayOpacity / 100 }}
-        />
+        <div className="hero__overlay" style={{ opacity: overlayOpacity / 100 }} />
       )}
 
       <div className="hero__inner">
-        <RichText.Content
-          tagName="h1"
-          className="hero__title"
-          value={title}
-        />
+        <RichText.Content tagName="h1" className="hero__title" value={title} />
 
-        <RichText.Content
-          tagName="p"
-          className="hero__description"
-          value={description}
-        />
+        <RichText.Content tagName="p" className="hero__description" value={description} />
 
         {buttonText && (
           <div className="hero__actions">

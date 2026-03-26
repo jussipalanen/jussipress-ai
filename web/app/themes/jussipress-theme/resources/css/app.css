@@ -582,9 +582,9 @@
   margin-bottom: 0.375rem;
 }
 
-#commentform input[type="text"],
-#commentform input[type="email"],
-#commentform input[type="url"],
+#commentform input[type='text'],
+#commentform input[type='email'],
+#commentform input[type='url'],
 #commentform textarea {
   width: 100%;
   padding: 0.625rem 0.875rem;
@@ -598,9 +598,9 @@
   outline: none;
 }
 
-#commentform input[type="text"]:focus,
-#commentform input[type="email"]:focus,
-#commentform input[type="url"]:focus,
+#commentform input[type='text']:focus,
+#commentform input[type='email']:focus,
+#commentform input[type='url']:focus,
 #commentform textarea:focus {
   border-color: var(--color-brand-500);
 }
@@ -617,7 +617,7 @@
   margin-bottom: 1.25rem;
 }
 
-#commentform .comment-form-cookies-consent input[type="checkbox"] {
+#commentform .comment-form-cookies-consent input[type='checkbox'] {
   margin-top: 0.2rem;
   width: 1rem;
   height: 1rem;

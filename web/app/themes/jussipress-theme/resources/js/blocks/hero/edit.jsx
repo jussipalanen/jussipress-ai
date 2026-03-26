@@ -1,20 +1,7 @@
 /** @jsxRuntime classic */
 /** @jsx wp.element.createElement */
 import { __ } from '@wordpress/i18n'
-import {
-  useBlockProps,
-  RichText,
-  InspectorControls,
-  MediaUpload,
-  MediaUploadCheck,
-} from '@wordpress/block-editor'
-import {
-  PanelBody,
-  RangeControl,
-  RadioControl,
-  Button,
-  TextControl,
-} from '@wordpress/components'
+import { useBlockProps } from '@wordpress/block-editor'
 
 export default function Edit({ attributes, setAttributes }) {
   const {
@@ -45,14 +32,14 @@ export default function Edit({ attributes, setAttributes }) {
               { label: __('Color', 'sage'), value: 'color' },
               { label: __('Image', 'sage'), value: 'image' },
             ]}
-            onChange={(value) => setAttributes({ backgroundType: value })}
+            onChange={value => setAttributes({ backgroundType: value })}
           />
 
           {backgroundType === 'image' && (
             <>
               <MediaUploadCheck>
                 <MediaUpload
-                  onSelect={(media) =>
+                  onSelect={media =>
                     setAttributes({
                       backgroundImage: { id: media.id, url: media.url },
                     })
@@ -97,7 +84,7 @@ export default function Edit({ attributes, setAttributes }) {
               <RangeControl
                 label={__('Overlay opacity (%)', 'sage')}
                 value={overlayOpacity}
-                onChange={(value) => setAttributes({ overlayOpacity: value })}
+                onChange={value => setAttributes({ overlayOpacity: value })}
                 min={0}
                 max={100}
               />
@@ -109,12 +96,12 @@ export default function Edit({ attributes, setAttributes }) {
           <TextControl
             label={__('Button text', 'sage')}
             value={buttonText}
-            onChange={(value) => setAttributes({ buttonText: value })}
+            onChange={value => setAttributes({ buttonText: value })}
           />
           <TextControl
             label={__('Button URL', 'sage')}
             value={buttonUrl}
-            onChange={(value) => setAttributes({ buttonUrl: value })}
+            onChange={value => setAttributes({ buttonUrl: value })}
             type="url"
           />
         </PanelBody>
@@ -122,10 +109,7 @@ export default function Edit({ attributes, setAttributes }) {
 
       <section {...blockProps} style={sectionStyle}>
         {backgroundType === 'image' && backgroundImage?.url && (
-          <div
-            className="hero__overlay"
-            style={{ opacity: overlayOpacity / 100 }}
-          />
+          <div className="hero__overlay" style={{ opacity: overlayOpacity / 100 }} />
         )}
 
         <div className="hero__inner">
@@ -133,7 +117,7 @@ export default function Edit({ attributes, setAttributes }) {
             tagName="h1"
             className="hero__title"
             value={title}
-            onChange={(value) => setAttributes({ title: value })}
+            onChange={value => setAttributes({ title: value })}
             placeholder={__('Hero title…', 'sage')}
           />
 
@@ -141,7 +125,7 @@ export default function Edit({ attributes, setAttributes }) {
             tagName="p"
             className="hero__description"
             value={description}
-            onChange={(value) => setAttributes({ description: value })}
+            onChange={value => setAttributes({ description: value })}
             placeholder={__('Hero description…', 'sage')}
           />
 
