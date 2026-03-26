@@ -1,4 +1,4 @@
-<article @php(post_class('mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24 h-entry'))>
+<article @php(post_class('mx-auto max-w-3xl px-4 pt-24 pb-16 sm:px-6 lg:px-8 lg:pt-32 lg:pb-24 h-entry'))>
 
     <header class="mb-10 border-b border-brand-800 pb-10">
         <h1 class="p-name text-3xl font-bold leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">
